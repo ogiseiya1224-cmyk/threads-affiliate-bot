@@ -1,4 +1,5 @@
 import os
+import random
 import anthropic
 import requests
 from dotenv import load_dotenv
@@ -50,17 +51,25 @@ def create_threads_post(text):
 def main():
     posts = [
         {
-            "theme": "ガジェット好きにおすすめの完全ワイヤレスイヤホン",
-            "url": "https://もしもアフィリエイトのリンク"
-        }
+            "theme": "完全ワイヤレスイヤホン（Technics EAH-AZ100またはBose QC Ultra）",
+            "url": "https://amzn.to/4g00mVc"
+        },
+        {
+            "theme": "SwitchBot ハブ3でスマートホームを始めよう",
+            "url": "https://amzn.to/4xPJLKb"
+        },
+        {
+            "theme": "Anker 65Wモバイルバッテリーで充電の不安をゼロに",
+            "url": "https://amzn.to/3SWnvxZ"
+        },
     ]
 
-    for post in posts:
-        print("投稿生成中：" + post["theme"])
-        text = generate_post(post["theme"], post["url"])
-        print("生成された投稿：\n" + text + "\n")
-        result = create_threads_post(text)
-        print("投稿結果：" + str(result))
+    post = random.choice(posts)
+    print("投稿生成中：" + post["theme"])
+    text = generate_post(post["theme"], post["url"])
+    print("生成された投稿：\n" + text + "\n")
+    result = create_threads_post(text)
+    print("投稿結果：" + str(result))
 
 if __name__ == "__main__":
     main()
