@@ -1,6 +1,8 @@
 import os
 import random
 import csv
+import json
+import base64
 import anthropic
 import requests
 from datetime import datetime
@@ -10,9 +12,85 @@ load_dotenv()
 
 THREADS_USER_ID = os.getenv("THREADS_USER_ID")
 THREADS_ACCESS_TOKEN = os.getenv("THREADS_ACCESS_TOKEN")
+THREADS_APP_SECRET = os.getenv("THREADS_APP_SECRET")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+GH_PAT = os.getenv("GH_PAT")
+GH_REPO = os.getenv("GH_REPO")
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+def refresh_token():
+    url = "https://graph.threads.net/refresh_access_token"
+    params = {
+        "grant_type": "th_refresh_token",
+        "access_token": THREADS_ACCESS_TOKEN
+    }
+    res = requests.get(url, params=params)
+    data = res.json()
+
+    if "access_token" not in data:
+        print("トークンリフレッシュ失敗: " + str(data))
+        return None
+
+    new_token = data["access_token"]
+    print("トークンリフレッシュ成功")
+
+    # GitHub Secretsを更新
+    if GH_PAT and GH_REPO:
+        update_github_secret(new_token)
+
+    return new_token
+
+def update_github_secret(new_token):
+    headers = {
+        "Authorization": "token " + GH_PAT,
+        "Accept": "application/vnd.github.v3+json"
+    }
+    key_res = requests.get(
+        "https://api.github.com/repos/" + GH_REPO + "/actions/secrets/public-key",
+        headers=headers
+    )
+    key_data = key_res.json()
+    key_id = key_data["key_id"]
+    public_key = key_data["key"]
+
+    import nacl.public
+    import nacl.encoding
+
+    pk = nacl.public.PublicKey(public_key, nacl.encoding.Base64Encoder)
+    sealed_box = nacl.public.SealedBox(pk)
+    encrypted = sealed_box.encrypt(new_token.encode())
+    encrypted_value = base64.b64encode(encrypted).decode()
+
+    update_res = requests.put(
+        "https://api.github.com/repos/" + GH_REPO + "/actions/secrets/THREADS_ACCESS_TOKEN",
+        headers=headers,
+        json={"encrypted_value": encrypted_value, "key_id": key_id}
+    )
+    if update_res.status_code in [201, 204]:
+        print("GitHub Secrets更新成功")
+    else:
+        print("GitHub Secrets更新失敗: " + str(update_res.json()))
+
+    # トークンを暗号化
+    import nacl.public
+    import nacl.encoding
+
+    pk = nacl.public.PublicKey(public_key, nacl.encoding.Base64Encoder)
+    sealed_box = nacl.public.SealedBox(pk)
+    encrypted = sealed_box.encrypt(new_token.encode())
+    encrypted_value = base64.b64encode(encrypted).decode()
+
+    # Secretsを更新
+    update_res = requests.put(
+        "https://api.github.com/repos/" + GH_REPO + "/actions/secrets/THREADS_ACCESS_TOKEN",
+        headers=headers,
+        json={"encrypted_value": encrypted_value, "key_id": key_id}
+    )
+    if update_res.status_code in [201, 204]:
+        print("GitHub Secrets更新成功")
+    else:
+        print("GitHub Secrets更新失敗: " + str(update_res.json()))
 
 def generate_post(theme, affiliate_url):
     message = client.messages.create(
@@ -21,7 +99,7 @@ def generate_post(theme, affiliate_url):
         messages=[
             {
                 "role": "user",
-                "content": "あなたはThreadsのアフィリエイト投稿を作成するプロのコピーライターです。以下の条件で投稿文を作成してください。\n\nテーマ：" + theme + "\nアフィリエイトURL：" + affiliate_url + "\n\n条件：\n- 200文字以内\n- 冒頭の1〜2文で思わず続きを読みたくなる導入を作る（感嘆・驚き・共感・問いかけ・倒置法などを自然に使う）\n- 商品の魅力を自然に伝える\n- 一部にあえて曖昧な表現や謎めいた言い回しを使い「どういうこと？」と読者に疑問を持たせる\n- URLを末尾に含める\n- ハッシュタグを3つ含める\n- 押しつけがましくない自然な文章\n\n投稿文のみを出力してください。"
+                "content": "あなたはThreadsのアフィリエイト投稿を作成するプロのコピーライターです。以下の条件で投稿文を作成してください。\n\nテーマ：" + theme + "\nアフィリエイトURL：" + affiliate_url + "\n\n条件：\n- 500文字以内\n- 冒頭の1〜2文で思わず続きを読みたくなる導入を作る（感嘆・驚き・共感・問いかけなどを自然に使う）\n- 一部にあえて曖昧な表現や謎めいた言い回しを使い「どういうこと？」と読者に疑問を持たせる\n- 商品の魅力を押しつけがましくなく自然に伝える\n- URLを末尾に含める\n- ハッシュタグを3つ含める\n- 人が書いたような自然な文体\n\n投稿文のみを出力してください。"
             }
         ]
     )
@@ -86,6 +164,9 @@ def save_to_csv(theme, post_id, engagement):
         ])
 
 def main():
+    # トークンを毎回リフレッシュ
+    # refresh_token()
+
     posts = [
         {
             "theme": "完全ワイヤレスイヤホン（Technics EAH-AZ100またはBose QC Ultra）",
