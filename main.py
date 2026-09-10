@@ -212,6 +212,82 @@ def main():
             "theme": "スマホもタブレットも急速充電、手のひらサイズの充電器が優秀すぎた",
             "url": "http://msm.to/4oTxvpG"
         },
+         {
+            "theme": "ケーブルが絡まるストレスから解放、巻き取り式が便利すぎる",
+            "url": "http://msm.to/EyRzCSv"
+        },
+        {
+            "theme": "持ち運びに最適、どこでも快適に使えるコンパクトマウス",
+            "url": "http://msm.to/EpeXrgV"
+        },
+         {
+            "theme": "デスクが一気にスッキリ、絡みにくい形状記憶ケーブルが便利",
+            "url": "http://msm.to/LiwWBQ"
+        },
+        {
+            "theme": "充電器とモバイルバッテリーがこれ1台、旅行にも最強すぎる",
+            "url": "http://msm.to/3k22rBO"
+        },
+        {
+            "theme": "乗るだけで体の状態をチェック、毎日の健康管理が楽しくなる体重計",
+            "url": "http://msm.to/2RV6nn"
+        },
+        {
+            "theme": "セルフカット派にもおすすめ、プロ仕様の切れ味がすごいバリカン",
+            "url": "http://msm.to/AqUOjq2"
+        },
+         {
+            "theme": "歯磨きが面倒な人ほど使ってほしい、電動歯ブラシの快適さ",
+            "url": "http://msm.to/GASNxP7"
+        },
+         {
+            "theme": "毎日の健康管理に、家で簡単に測れる上腕式血圧計",
+            "url": "http://msm.to/8BNmFfC"
+        },
+         {
+            "theme": "家で手軽に全身ケア、振動するフォームローラーが気持ちいい",
+            "url": "http://msm.to/DlGbx21"
+        },
+         {
+            "theme": "旅行やアウトドアの思い出を残すなら、小さくても本格的なアクションカメラ",
+            "url": "https://link.amazon/B0fJPTh1g"
+        },
+        {
+            "theme": "スマホ動画が一気にプロっぽくなる、手ブレを抑えるスマホジンバル",
+            "url": "https://link.amazon/B08sCxyb7"
+        },
+        {
+            "theme": "家でも旅行先でも映画館に、持ち運べるプロジェクターが最高",
+            "url": "https://link.amazon/B0djnjJYa"
+        },
+        {
+            "theme": "デスクをスッキリさせたい人へ、コンパクトなのに打ちやすいキーボード",
+            "url": "https://link.amazon/B04NFfHTB"
+        },
+        {
+            "theme": "モニター周りが一気に快適に、デスク環境を整えるならこれ",
+            "url": "https://link.amazon/B0fXjiy8q"
+        },
+        {
+            "theme": "デスクの手元だけ明るくしたいなら、モニター上のライトが便利",
+            "url": "https://link.amazon/B0fBraZwI"
+        },
+         {
+            "theme": "掃除する時間を減らしたい人へ、コンパクトなロボット掃除機",
+            "url": "https://link.amazon/B06Y1wg7h"
+        },
+         {
+            "theme": "スマホや小物をサッと持ち歩ける、身軽に出かけたい人の便利バッグ",
+            "url": "https://link.amazon/B0be31fuY"
+        },
+         {
+            "theme": "耳をふさがない開放感、イヤーカフ型イヤホンが新感覚すぎる",
+            "url": "https://link.amazon/B0hXuriWl"
+        },
+         {
+            "theme": "ノートPCまで充電できる、165Wの超パワフルなモバイルバッテリー",
+            "url": "https://link.amazon/B0g4VxdcM"
+        },
     ]
 
     post = random.choice(posts)

@@ -2,9 +2,9 @@ name: Daily Threads Post
 
 on:
   schedule:
-    - cron: '0 0 * * *'   # 朝9時（JST）
-    - cron: '0 3 * * *'   # 昼12時（JST）
-    - cron: '0 9 * * *'   # 夜18時（JST）
+    - cron: '0 22 * * *'   # JST 7時（前日UTC 22時）
+    - cron: '30 3 * * *'   # JST 12時半（UTC 3時30分）
+    - cron: '0 10 * * *'   # JST 19時（UTC 10時）
   workflow_dispatch:
 
 jobs:
@@ -29,4 +29,3 @@ jobs:
           THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python main.py
-        
