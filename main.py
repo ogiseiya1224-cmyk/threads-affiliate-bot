@@ -94,13 +94,25 @@ def update_github_secret(new_token):
 
 def get_ogp_image(url):
     try:
-        headers = {"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1)"}
-        res = requests.get(url, headers=headers, timeout=10)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        res = requests.get(url, headers=headers, timeout=10, allow_redirects=True)
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(res.text, "lxml")
+        
+        # OGP画像を試す
         og_image = soup.find("meta", property="og:image")
         if og_image and og_image.get("content"):
             return og_image["content"]
+        
+        # Amazon商品画像を試す
+        img = soup.find("img", {"id": "landingImage"})
+        if img:
+            src = img.get("src") or img.get("data-src")
+            if src and src.startswith("http"):
+                return src
+        
         return None
     except:
         return None
