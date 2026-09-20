@@ -92,6 +92,19 @@ def update_github_secret(new_token):
     else:
         print("GitHub Secrets更新失敗: " + str(update_res.json()))
 
+def get_ogp_image(url):
+    try:
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1)"}
+        res = requests.get(url, headers=headers, timeout=10)
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(res.text, "lxml")
+        og_image = soup.find("meta", property="og:image")
+        if og_image and og_image.get("content"):
+            return og_image["content"]
+        return None
+    except:
+        return None
+
 def generate_post(theme, affiliate_url):
     message = client.messages.create(
         model="claude-haiku-4-5",
@@ -105,13 +118,23 @@ def generate_post(theme, affiliate_url):
     )
     return message.content[0].text
 
-def create_threads_post(text):
+def create_threads_post(text, image_url=None):
     container_url = "https://graph.threads.net/v1.0/" + THREADS_USER_ID + "/threads"
-    container_params = {
-        "media_type": "TEXT",
-        "text": text,
-        "access_token": THREADS_ACCESS_TOKEN
-    }
+    
+    if image_url:
+        container_params = {
+            "media_type": "IMAGE",
+            "image_url": image_url,
+            "text": text,
+            "access_token": THREADS_ACCESS_TOKEN
+        }
+    else:
+        container_params = {
+            "media_type": "TEXT",
+            "text": text,
+            "access_token": THREADS_ACCESS_TOKEN
+        }
+    
     container_res = requests.post(container_url, params=container_params)
     container_data = container_res.json()
 
@@ -294,7 +317,14 @@ def main():
     print("投稿生成中：" + post["theme"])
     text = generate_post(post["theme"], post["url"])
     print("生成された投稿：\n" + text + "\n")
-    result = create_threads_post(text)
+    
+    image_url = get_ogp_image(post["url"])
+    if image_url:
+        print("画像取得成功：" + image_url)
+    else:
+        print("画像取得失敗、テキスト投稿に切り替え")
+    
+    result = create_threads_post(text, image_url)
     print("投稿結果：" + str(result))
 
     if "id" in result:
