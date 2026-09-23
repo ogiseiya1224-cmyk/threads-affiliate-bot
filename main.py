@@ -94,25 +94,29 @@ def update_github_secret(new_token):
 
 def get_ogp_image(url):
     try:
+        import re
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
         res = requests.get(url, headers=headers, timeout=10, allow_redirects=True)
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(res.text, "lxml")
-        
-        # OGP画像を試す
+
         og_image = soup.find("meta", property="og:image")
         if og_image and og_image.get("content"):
-            return og_image["content"]
-        
-        # Amazon商品画像を試す
+            img_url = og_image["content"]
+            img_url = re.sub(r'/W/[^/]+/images/I/', '/images/I/', img_url)
+            src = src.replace("+", "%2B")
+            return img_url
+
         img = soup.find("img", {"id": "landingImage"})
         if img:
             src = img.get("src") or img.get("data-src")
             if src and src.startswith("http"):
+                src = re.sub(r'/W/[^/]+/images/I/', '/images/I/', src)
+                src = src.replace("+", "%2B")
                 return src
-        
+
         return None
     except:
         return None
@@ -124,7 +128,7 @@ def generate_post(theme, affiliate_url):
         messages=[
             {
                 "role": "user",
-                "content": "あなたはThreadsのアフィリエイト投稿を作成するプロのコピーライターです。以下の条件で投稿文を作成してください。\n\nテーマ：" + theme + "\nアフィリエイトURL：" + affiliate_url + "\n\n条件：\n- 500文字以内\n- 冒頭の1〜2文で思わず続きを読みたくなる導入を作る（感嘆・驚き・共感・問いかけなどを自然に使う）\n- 一部にあえて曖昧な表現や謎めいた言い回しを使い「どういうこと？」と読者に疑問を持たせる\n- 商品の魅力を押しつけがましくなく自然に伝える\n- URLを末尾に含める\n- ハッシュタグを3つ含める\n- 人が書いたような自然な文体\n\n投稿文のみを出力してください。"
+                "content": "あなたはThreadsのアフィリエイト投稿を作成するプロのコピーライターです。以下の条件で投稿文を作成してください。\n\nテーマ：" + theme + "\n\n条件：\n- 200文字以内\n- 冒頭の1〜2文で思わず続きを読みたくなる導入を作る（感嘆・驚き・共感・問いかけなどを自然に使う）\n- 一部にあえて曖昧な表現や謎めいた言い回しを使い「どういうこと？」と読者に疑問を持たせる\n- 商品の魅力を押しつけがましくなく自然に伝える\n- ハッシュタグを3つ含める\n- 人が書いたような自然な文体\n\n投稿文のみを出力してください。"
             }
         ]
     )
@@ -152,6 +156,34 @@ def create_threads_post(text, image_url=None):
 
     if "id" not in container_data:
         raise Exception("コンテナ作成失敗: " + str(container_data))
+
+    container_id = container_data["id"]
+
+    publish_url = "https://graph.threads.net/v1.0/" + THREADS_USER_ID + "/threads_publish"
+    publish_params = {
+        "creation_id": container_id,
+        "access_token": THREADS_ACCESS_TOKEN
+    }
+    publish_res = requests.post(publish_url, params=publish_params)
+    return publish_res.json()
+
+def create_threads_comment(post_id, text):
+    container_url = "https://graph.threads.net/v1.0/" + THREADS_USER_ID + "/threads"
+    container_params = {
+        "media_type": "TEXT",
+        "text": text,
+        "reply_to_id": post_id,
+        "access_token": THREADS_ACCESS_TOKEN
+    }
+    container_res = requests.post(container_url, params=container_params)
+    if not container_res.text:
+        print("コメントコンテナ作成失敗: レスポンスが空")
+        return None
+    container_data = container_res.json()
+
+    if "id" not in container_data:
+        print("コメントコンテナ作成失敗: " + str(container_data))
+        return None
 
     container_id = container_data["id"]
 
@@ -205,123 +237,153 @@ def main():
     posts = [
         {
             "theme": "完全ワイヤレスイヤホン（Technics EAH-AZ100またはBose QC Ultra）",
-            "url": "https://link.amazon/B0iw3Ui4w"
+            "url": "https://link.amazon/B0iw3Ui4w",
+            "image_url": "https://m.media-amazon.com/images/I/712npClZeNL._AC_SL1500_.jpg"
         },
         {
             "theme": "SwitchBot ハブ3でスマートホームを始めよう",
-            "url": "https://link.amazon/B01y627WE"
+            "url": "https://link.amazon/B01y627WE",
+            "image_url": "https://m.media-amazon.com/images/I/61LHylnb+TL._AC_SL1500_.jpg"
         },
         {
             "theme": "Anker 65Wモバイルバッテリーで充電の不安をゼロに",
-            "url": "https://link.amazon/B001mPj5V"
+            "url": "https://link.amazon/B001mPj5V",
+            "image_url": "https://m.media-amazon.com/images/I/41-l-2qotAL._AC_SL1500_.jpg"
         },
         {
             "theme": "SwitchBot CO2センサーで室内環境を見える化しよう",
-            "url": "https://link.amazon/B09v8E73s"
+            "url": "https://link.amazon/B09v8E73s",
+            "image_url": "https://m.media-amazon.com/images/I/71czGp0EbiL._AC_SL1500_.jpg"
         },
         {
-            "theme": "USB急速充電器（多ポート）で充電環境をスッキリさせよう",
-            "url": "https://link.amazon/B0eE7ReM5"
+            "theme": "アイロン台、もう捨てていいかもしれない",
+            "url": "https://link.amazon/B01NIvuUz",
+            "image_url": "https://m.media-amazon.com/images/I/51jW6rdCg7L._AC_SL1500_.jpg"
         },
         {
             "theme": "Amazon Fire TV Stick HDでテレビをスマート化しよう",
-            "url": "https://link.amazon/B04DAlieM"
+            "url": "https://link.amazon/B04DAlieM",
+            "image_url": "https://m.media-amazon.com/images/I/61dPQpIF4+L._AC_SL1500_.jpg"
         },
         {
             "theme": "Ulike脱毛器Air 10 Maxで自宅脱毛を始めよう",
-            "url": "https://link.amazon/B0cy6mLnP"
+            "url": "https://link.amazon/B0cy6mLnP",
+            "image_url": "https://m.media-amazon.com/images/I/61NFZsTH6JL._AC_SL1500_.jpg"
         },
         {
             "theme": "ARグラスXREAL Oneで新しい映像体験を",
-            "url": "https://link.amazon/B0ibVWQ20"
+            "url": "https://link.amazon/B0ibVWQ20",
+            "image_url": "https://m.media-amazon.com/images/I/61Hg2T0JUkL._AC_SL1500_.jpg"
         },
         {
-            "theme": "冷却プレート付きハンディファンで夏を快適に",
-            "url": "https://link.amazon/B07v9cC0G"
+            "theme": "エアコンの電気代、実はこれで半分になる",
+            "url": "https://link.amazon/A02IRxWa8",
+            "image_url": "https://m.media-amazon.com/images/I/61xbQjT5MOL._AC_SL1500_.jpg"
         },
         {
             "theme": "レーザー・EMS美顔器で自宅エステを始めよう",
-            "url": "https://link.amazon/B0brA7kaB"
+            "url": "https://link.amazon/B0brA7kaB",
+            "image_url": "https://m.media-amazon.com/images/I/71Whfv1DMPL._AC_SL1500_.jpg"
         },
         {
             "theme": "スマホもタブレットも急速充電、手のひらサイズの充電器が優秀すぎた",
-            "url": "http://msm.to/4oTxvpG"
+            "url": "https://link.amazon/B0fN6gRN0",
+            "image_url": "https://m.media-amazon.com/images/I/71CCpDKZ6FL._AC_SL1500_.jpg"
         },
          {
             "theme": "ケーブルが絡まるストレスから解放、巻き取り式が便利すぎる",
-            "url": "http://msm.to/EyRzCSv"
+            "url": "https://link.amazon/B09rnGVmy",
+            "image_url": "https://m.media-amazon.com/images/I/41JJfrRjwnL._AC_SL1000_.jpg"
         },
         {
             "theme": "持ち運びに最適、どこでも快適に使えるコンパクトマウス",
-            "url": "http://msm.to/EpeXrgV"
+            "url": "https://link.amazon/B0aip6PVS",
+            "image_url": "https://m.media-amazon.com/images/I/51dXMJYWGVL._AC_SL1500_.jpg"
         },
          {
             "theme": "デスクが一気にスッキリ、絡みにくい形状記憶ケーブルが便利",
-            "url": "http://msm.to/LiwWBQ"
+            "url": "https://link.amazon/B024fshvD",
+            "image_url": "https://m.media-amazon.com/images/I/71BConSFY0L._AC_SL1500_.jpg"
         },
         {
             "theme": "充電器とモバイルバッテリーがこれ1台、旅行にも最強すぎる",
-            "url": "http://msm.to/3k22rBO"
+            "url": "https://link.amazon/B09qSCcx1",
+            "image_url": "https://m.media-amazon.com/images/I/61uYvK6bOaL._AC_SL1500_.jpg"
         },
         {
             "theme": "乗るだけで体の状態をチェック、毎日の健康管理が楽しくなる体重計",
-            "url": "http://msm.to/2RV6nn"
+            "url": "https://link.amazon/B0hZF1iCn",
+            "image_url": "https://m.media-amazon.com/images/I/51KkctGkAGL._SL1500_.jpg"
         },
         {
             "theme": "セルフカット派にもおすすめ、プロ仕様の切れ味がすごいバリカン",
-            "url": "http://msm.to/AqUOjq2"
+            "url": "https://link.amazon/B0gqjWk06",
+            "image_url": "https://m.media-amazon.com/images/I/61fI4+l6RrL._AC_SL1500_.jpg"
         },
          {
             "theme": "歯磨きが面倒な人ほど使ってほしい、電動歯ブラシの快適さ",
-            "url": "http://msm.to/GASNxP7"
+            "url": "https://link.amazon/B052uUxwe",
+            "image_url": "https://m.media-amazon.com/images/I/71nNsf9EzhL._AC_SL1500_.jpg"
         },
          {
             "theme": "毎日の健康管理に、家で簡単に測れる上腕式血圧計",
-            "url": "http://msm.to/8BNmFfC"
+            "url": "https://link.amazon/B0bbsb5Yu",
+            "image_url": "https://m.media-amazon.com/images/I/81UUrmMlEeL._AC_SL1500_.jpg"
         },
          {
             "theme": "家で手軽に全身ケア、振動するフォームローラーが気持ちいい",
-            "url": "http://msm.to/DlGbx21"
+            "url": "https://link.amazon/B0fI9g2gL",
+            "image_url": "https://m.media-amazon.com/images/I/71aAZeK0y6L._AC_SL1500_.jpg"
         },
          {
             "theme": "旅行やアウトドアの思い出を残すなら、小さくても本格的なアクションカメラ",
-            "url": "https://link.amazon/B0fJPTh1g"
+            "url": "https://link.amazon/B0fJPTh1g",
+            "image_url": "https://m.media-amazon.com/images/I/71aAZeK0y6L._AC_SL1500_.jpg"
         },
         {
             "theme": "スマホ動画が一気にプロっぽくなる、手ブレを抑えるスマホジンバル",
-            "url": "https://link.amazon/B08sCxyb7"
+            "url": "https://link.amazon/B08sCxyb7",
+            "image_url": "https://m.media-amazon.com/images/I/612zsTP6aOL._AC_SL1500_.jpg"
         },
         {
             "theme": "家でも旅行先でも映画館に、持ち運べるプロジェクターが最高",
-            "url": "https://link.amazon/B0djnjJYa"
+            "url": "https://link.amazon/B0djnjJYa",
+            "image_url": "https://m.media-amazon.com/images/I/51fywU7gzvL._AC_SL1500_.jpg"
         },
         {
             "theme": "デスクをスッキリさせたい人へ、コンパクトなのに打ちやすいキーボード",
-            "url": "https://link.amazon/B04NFfHTB"
+            "url": "https://link.amazon/B04NFfHTB",
+            "image_url": "https://m.media-amazon.com/images/I/71lv30kG5PL._AC_SL1500_.jpg"
         },
         {
             "theme": "モニター周りが一気に快適に、デスク環境を整えるならこれ",
-            "url": "https://link.amazon/B0fXjiy8q"
+            "url": "https://link.amazon/B0fXjiy8q",
+            "image_url": "https://m.media-amazon.com/images/I/610HqQsInRL._AC_SL1500_.jpg"
         },
         {
             "theme": "デスクの手元だけ明るくしたいなら、モニター上のライトが便利",
-            "url": "https://link.amazon/B0fBraZwI"
+            "url": "https://link.amazon/B0fBraZwI",
+            "image_url": "https://m.media-amazon.com/images/I/41TAzUt61kL._AC_SL1000_.jpg"
         },
          {
             "theme": "掃除する時間を減らしたい人へ、コンパクトなロボット掃除機",
-            "url": "https://link.amazon/B06Y1wg7h"
+            "url": "https://link.amazon/B06Y1wg7h",
+            "image_url": "https://m.media-amazon.com/images/I/51x7VFDNPZL._AC_SL1500_.jpg"
         },
          {
             "theme": "スマホや小物をサッと持ち歩ける、身軽に出かけたい人の便利バッグ",
-            "url": "https://link.amazon/B0be31fuY"
+            "url": "https://link.amazon/B0be31fuY",
+            "image_url": "https://m.media-amazon.com/images/I/51TcjglEOrL._AC_SY695_.jpg"
         },
          {
             "theme": "耳をふさがない開放感、イヤーカフ型イヤホンが新感覚すぎる",
-            "url": "https://link.amazon/B0hXuriWl"
+            "url": "https://link.amazon/B0hXuriWl",
+            "image_url": "https://m.media-amazon.com/images/I/61-7qS0FwcL._AC_SL1500_.jpg"
         },
          {
             "theme": "ノートPCまで充電できる、165Wの超パワフルなモバイルバッテリー",
-            "url": "https://link.amazon/B0g4VxdcM"
+            "url": "https://link.amazon/B0g4VxdcM",
+            "image_url": "https://m.media-amazon.com/images/I/51y+8qqjBkL._AC_SL1500_.jpg"
         },
     ]
 
@@ -329,18 +391,25 @@ def main():
     print("投稿生成中：" + post["theme"])
     text = generate_post(post["theme"], post["url"])
     print("生成された投稿：\n" + text + "\n")
-    
-    image_url = get_ogp_image(post["url"])
+
+    image_url = post.get("image_url") or get_ogp_image(post["url"])
     if image_url:
         print("画像取得成功：" + image_url)
     else:
         print("画像取得失敗、テキスト投稿に切り替え")
-    
+
     result = create_threads_post(text, image_url)
     print("投稿結果：" + str(result))
 
     if "id" in result:
         post_id = result["id"]
+     # コメントにリンクを投稿
+        import time
+        time.sleep(5)
+        comment_text = "🛒 商品はこちら→ " + post["url"]
+        comment_result = create_threads_comment(post_id, comment_text)
+        print("コメント投稿結果：" + str(comment_result))
+
         engagement = get_engagement(post_id)
         save_to_csv(post["theme"], post_id, engagement)
         print("エンゲージメント：" + str(engagement))
