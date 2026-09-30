@@ -128,7 +128,7 @@ def generate_post(theme, affiliate_url):
         messages=[
             {
                 "role": "user",
-                "content": "あなたはThreadsのアフィリエイト投稿を作成するプロのコピーライターです。以下の条件で投稿文を作成してください。\n\nテーマ：" + theme + "\n\n条件：\n- 200文字以内\n- 冒頭の1〜2文で思わず続きを読みたくなる導入を作る（感嘆・驚き・共感・問いかけなどを自然に使う）\n- 一部にあえて曖昧な表現や謎めいた言い回しを使い「どういうこと？」と読者に疑問を持たせる\n- 商品の魅力を押しつけがましくなく自然に伝える\n- ハッシュタグを3つ含める\n- 人が書いたような自然な文体\n\n投稿文のみを出力してください。"
+                "content": "あなたはThreadsのアフィリエイト投稿を作成するプロのコピーライターです。以下の条件で投稿文を作成してください。\n\nテーマ：" + theme + "\nアフィリエイトURL：" + affiliate_url + "\n\n条件：\n- 200文字以内\n- 冒頭の1〜2文で思わず続きを読みたくなる導入を作る（感嘆・驚き・共感・問いかけなどを自然に使う）\n- 一部にあえて曖昧な表現や謎めいた言い回しを使い「どういうこと？」と読者に疑問を持たせる\n- 商品の魅力を押しつけがましくなく自然に伝える\n- ハッシュタグを3つ含める\n- URLを末尾に含める\n- 人が書いたような自然な文体\n\n投稿文のみを出力してください。"
             }
         ]
     )
@@ -156,34 +156,6 @@ def create_threads_post(text, image_url=None):
 
     if "id" not in container_data:
         raise Exception("コンテナ作成失敗: " + str(container_data))
-
-    container_id = container_data["id"]
-
-    publish_url = "https://graph.threads.net/v1.0/" + THREADS_USER_ID + "/threads_publish"
-    publish_params = {
-        "creation_id": container_id,
-        "access_token": THREADS_ACCESS_TOKEN
-    }
-    publish_res = requests.post(publish_url, params=publish_params)
-    return publish_res.json()
-
-def create_threads_comment(post_id, text):
-    container_url = "https://graph.threads.net/v1.0/" + THREADS_USER_ID + "/threads"
-    container_params = {
-        "media_type": "TEXT",
-        "text": text,
-        "reply_to_id": post_id,
-        "access_token": THREADS_ACCESS_TOKEN
-    }
-    container_res = requests.post(container_url, params=container_params)
-    if not container_res.text:
-        print("コメントコンテナ作成失敗: レスポンスが空")
-        return None
-    container_data = container_res.json()
-
-    if "id" not in container_data:
-        print("コメントコンテナ作成失敗: " + str(container_data))
-        return None
 
     container_id = container_data["id"]
 
@@ -398,17 +370,19 @@ def main():
     else:
         print("画像取得失敗、テキスト投稿に切り替え")
 
-    result = create_threads_post(text, image_url)
+    result = None
+    if image_url:
+        try:
+            result = create_threads_post(text, image_url)
+        except Exception as e:
+            print("画像投稿失敗、テキスト投稿に切り替え: " + str(e))
+            result = create_threads_post(text, None)
+    else:
+        result = create_threads_post(text, None)
     print("投稿結果：" + str(result))
 
     if "id" in result:
         post_id = result["id"]
-     # コメントにリンクを投稿
-        import time
-        time.sleep(5)
-        comment_text = "🛒 商品はこちら→ " + post["url"]
-        comment_result = create_threads_comment(post_id, comment_text)
-        print("コメント投稿結果：" + str(comment_result))
 
         engagement = get_engagement(post_id)
         save_to_csv(post["theme"], post_id, engagement)
