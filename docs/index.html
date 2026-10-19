@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>くらしアップデートラボ｜生活の質を上げるアイテムを厳選紹介</title>
+  <meta name="description" content="ガジェット・サプリ・日用品など、生活の質を上げるアイテムを毎日お届け。フォローしてくらしをアップデートしよう。">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap">
+  <style>
+    /* ==========================================
+       DESIGN TOKENS
+       Layout: header → hero → card grid → footer
+       Color: warm navy + pale sand, accent saffron
+       Type: Noto Serif JP (display) / Noto Sans JP (body)
+    ========================================== */
+    :root {
+      --bg:       #f8f6f1;
+      --surface:  #ffffff;
+      --fg:       #1a1816;
+      --muted:    #6b6560;
+      --accent:   #d4820a;
+      --accent-l: #f5e4c0;
+      --border:   #e4e0d8;
+      --navy:     #1e2d40;
+      --ff-display: 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      --ff-body:    'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+      color-scheme: light;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:       #131110;
+        --surface:  #1e1c1a;
+        --fg:       #f0ece4;
+        --muted:    #9a9490;
+        --accent:   #e8960f;
+        --accent-l: #3a2a0a;
+        --border:   #2e2c28;
+        --navy:     #1a2535;
+        color-scheme: dark;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--ff-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.7;
+    }
+
+    /* ==========================================
+       HEADER
+    ========================================== */
+    .site-header {
+      background: var(--navy);
+      padding: 0 24px;
+    }
+    .header-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 0;
+    }
+    .logo-mark {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-family: var(--ff-display);
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .site-name {
+      font-family: var(--ff-display);
+      font-size: clamp(15px, 3.5vw, 19px);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+    }
+    .site-tagline {
+      font-size: 10px;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.04em;
+      margin-top: 3px;
+    }
+
+    /* ==========================================
+       HERO
+    ========================================== */
+    .hero {
+      background: var(--navy);
+      padding: 52px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 80% 50%, rgba(212,130,10,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .hero h1 {
+      font-family: var(--ff-display);
+      font-size: clamp(24px, 5vw, 40px);
+      font-weight: 700;
+      line-height: 1.4;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    .hero-lead {
+      font-size: clamp(13px, 2vw, 15px);
+      color: rgba(255,255,255,0.72);
+      max-width: 520px;
+      line-height: 1.9;
+    }
+    .hero-threads {
+      margin-top: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 100px;
+      padding: 10px 20px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .hero-threads:hover {
+      background: rgba(255,255,255,0.18);
+    }
+    .threads-icon {
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    /* ==========================================
+       SECTION HEADER
+    ========================================== */
+    .section-header {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 48px 24px 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .section-label {
+      font-family: var(--ff-display);
+      font-size: clamp(18px, 3vw, 22px);
+      font-weight: 700;
+      color: var(--fg);
+    }
+    .section-count {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ==========================================
+       CARD GRID
+    ========================================== */
+    .grid-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 64px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .card:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      transform: translateY(-3px);
+    }
+    .card-img {
+      aspect-ratio: 4 / 3;
+      background: var(--accent-l);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .card-emoji {
+      font-size: 40px;
+    }
+    .card-body {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card-cat {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .card-title {
+      font-family: var(--ff-display);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.55;
+      color: var(--fg);
+    }
+    .card-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.8;
+      flex: 1;
+    }
+    .card-cta {
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .card-cta::after { content: " →"; }
+
+    /* ==========================================
+       FOOTER
+    ========================================== */
+    .site-footer {
+      background: var(--navy);
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .footer-inner {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .footer-logo {
+      font-family: var(--ff-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .footer-note {
+      font-size: 12px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.9;
+    }
+    .footer-disclaimer {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      margin-top: 16px;
+      line-height: 1.8;
+    }
+
+    /* ==========================================
+       RESPONSIVE
+    ========================================== */
+    @media (max-width: 560px) {
+      .grid-wrap { grid-template-columns: 1fr 1fr; padding: 0 16px 48px; gap: 12px; }
+      .hero { padding: 40px 16px 48px; }
+      .site-header { padding: 0 16px; }
+      .section-header { padding: 36px 16px 20px; }
+    }
+    @media (max-width: 360px) {
+      .grid-wrap { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- =====================
+     HEADER
+===================== -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo-mark">く</div>
+    <div>
+      <div class="site-name">くらしアップデートラボ</div>
+      <div class="site-tagline">ガジェット｜サプリ｜日用品｜お得情報</div>
+    </div>
+  </div>
+</header>
+
+<!-- =====================
+     HERO
+===================== -->
+<section class="hero">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">毎日更新中</p>
+    <h1>生活の質を上げる<br>アイテムを厳選してお届け🔬</h1>
+    <p class="hero-lead">ガジェット、サプリ、日用品…試して良かったものだけを毎日紹介しています。フォローして、くらしをアップデートしよう✨</p>
+    <a class="hero-threads" href="https://www.threads.net/@kurashi_update_lab" target="_blank" rel="noopener">
+      <span class="threads-icon">T</span>
+      Threadsでフォローする
+    </a>
+  </div>
+</section>
+
+<!-- =====================
+     PRODUCTS
+===================== -->
+<div class="section-header">
+  <span class="section-label">おすすめ商品一覧</span>
+  <span class="section-count">全11件</span>
+</div>
+
+<div class="grid-wrap">
+
+  <!-- ★ 商品を追加するときは下のブロックをコピーしてURLと内容を変えるだけ ★ -->
+
+  <a class="card" href="https://link.amazon/B0iw3Ui4w" target="_blank" rel="noopener">
+    <!-- Amazonの商品画像URLがある場合は下の行を使う（emojの行は消す）-->
+    <!-- <div class="card-img"><img src="https://m.media-amazon.com/images/I/712npClZeNL._AC_SL1500_.jpg" alt="完全ワイヤレスイヤホン" loading="lazy"></div> -->
+    <div class="card-img"><div class="card-emoji">🎧</div></div>
+    <div class="card-body">
+      <span class="card-cat">ガジェット</span>
+      <p class="card-title">完全ワイヤレスイヤホン</p>
+      <p class="card-desc">ノイキャン＋高音質で集中力アップ。バッテリー長持ち・コンパクトケース付き。</p>
+      <span class="card-cta">Amazonで見る</span>
+    </div>
+  </a>
+
+  <a class="card" href="https://link.amazon/B01y627WE" target="_blank" rel="noopener">
+    <div class="card-img"><div class="card-emoji">🏠</div></div>
+    <div class="card-body">
+      <span class="card-cat">スマートホーム</span>
+      <p class="card-title">SwitchBot ハブ3</p>
+      <p class="card-desc">家電をスマホ1つで管理。外出先からもOK。スマートホームの入口に。</p>
+      <span class="card-cta">Amazonで見る</span>
+    </div>
+  </a>
+
+  <a class="card" href="https://link.amazon/B001mPj5V" target="_blank" rel="noopener">
+    <div class="card-img"><div class="card-emoji">🔋</div></div>
+    <div class="card-body">
+      <span class="card-cat">ガジェット</span>
+      <p class="card-title">Anker 65W モバイルバッテリー</p>
+      <p class="card-desc">65W急速充電対応。ノートPCもスマホも1台で充電。出張・旅行の必需品。</p>
+      <span class="card-cta">Amazonで見る</span>
+    </div>
+  </a>
+
+  <a class="card" href="https://link.amazon/B09v8E73s" target="_blank" rel="noopener">
+    <div class="card-img"><div class="card-emoji">🌬️</div></div>
+    <div class="card-body">
+      <span class="card-cat">スマートホーム</span>
+      <p class="card-title">SwitchBot CO₂センサー</p>
+      <p class="card-desc">部屋の空気質を見える化。CO₂濃度が高いと集中力が落ちるので換気の目安に。</p>
+      <span class="card-cta">Amazonで見る</span>
+    </div>
+  </a>
+
+  <a class="card" href="https://link.amazon/B0fN6gRN0" target="_blank" rel="noopener">
+    <div class="card-img"><div class="card-emoji">⚡</div></div>
+    <div class="card-body">
+      <span class="card-cat">ガジェット</span>
+      <p class="card-title">USB急速充電器（多ポート）</p>
+      <p class="card-desc">複数デバイスを同時に高速充電。コンセント周りがスッキリ。</p>
+      <span class="card-cta">Amazonで見る</span>
+    </div>
+  </a>
+
+  <a class="card" href="https://link.amazon/B04DAlieM" target="_blank" rel="noopener">
+    <div class="card-img"><div class="card-emoji">📺</div></div>
+    <div class="card-body">
+      <span class="card-cat">エンタメ</span>
+      <p class="card-title">Amazon Fire TV Stick HD</p>
+      <p class="card-desc">普通のテレビがスマートTVに。Netflix・Prime Video・YouTube対応。</p>
+      <span class="card-cta">Amazonで見る</span>
+    </div>
+  </a>
+
+  <a class="card" href="https://link.amazon/B0cy6mLnP" target="_blank" rel="noopener">
+    <div class="card-img"><div class="card-emoji">✨</div></div>
+    <div class="card-body">
+      <span class="card-cat">美容</span>
+      <p class="card-title">Ulike 脱毛器 Air 10 Max</p>
+      <p class="card-desc">サロン級のIPL脱毛が自宅で。冷却機能付きで痛みが少ない。</p>
+      <span class="card-cta">Amazonで見る</span>
+    </div>
+  </a>
+
+  <a class="card" href="https://link.amazon/B0ibVWQ20" target="_blank" rel="noopener">
+    <div class="card-img"><div class="card-emoji">🥽</div></div>
+    <div class="card-body">
+      <span class="card-cat">ガジェット</span>
+      <p class="card-title">ARグラス XREAL One</p>
+      <p class="card-desc">目の前に大画面が出現。映画・作業・ゲームの体験が激変するARデバイス。</p>
+      <span class="card-cta">Amazonで見る</span>
+    </div>
+  </a>
+
+  <a class="card" href="https://link.amazon/B0brA7kaB" target="_blank" rel="noopener">
+    <div class="card-img"><div class="card-emoji">💆</div></div>
+    <div class="card-body">
+      <span class="card-cat">美容</span>
+      <p class="card-title">レーザー・EMS美顔器</p>
+      <p class="card-desc">自宅でリフトアップケア。毎日のスキンケアにプラスするだけ。</p>
+      <span class="card-cta">Amazonで見る</span>
+    </div>
+  </a>
+
+  <a class="card" href="https://link.amazon/B0bxXbvaq" target="_blank" rel="noopener">
+    <div class="card-img"><div class="card-emoji">🔌</div></div>
+    <div class="card-body">
+      <span class="card-cat">ガジェット</span>
+      <p class="card-title">Anker 511 Charger Nano 3</p>
+      <p class="card-desc">超コンパクトなのに30W出力。持ち歩き充電器の最適解のひとつ。</p>
+      <span class="card-cta">Amazonで見る</span>
+    </div>
+  </a>
+
+    <a class="card" href="https://link.amazon/B0hXuriWl" target="_blank" rel="noopener">
+    <div class="card-img"><div class="card-emoji">🔌</div></div>
+    <div class="card-body">
+      <span class="card-cat">ガジェット</span>
+      <p class="card-title">ゼンハイザー(Sennheiser) ACCENTUM Clip</p>
+      <p class="card-desc">耳をふさがない開放感、イヤーカフ型イヤホンが新感覚すぎる</p>
+      <span class="card-cta">Amazonで見る</span>
+    </div>
+  </a>
+
+</div>
+
+<!-- =====================
+     FOOTER
+===================== -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-logo">くらしアップデートラボ</div>
+    <p class="footer-note">
+      ガジェット｜サプリ｜日用品｜お得情報<br>
+      Threadsでも毎日更新中！
+    </p>
+    <p class="footer-disclaimer">
+      ※ 本サイトはAmazonアソシエイト・もしもアフィリエイトプログラムに参加しています。<br>
+      商品リンクから購入いただいた場合、サイト運営者に報酬が発生することがあります。
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
